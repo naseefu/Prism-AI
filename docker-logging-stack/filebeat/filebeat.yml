@@ -1,0 +1,17 @@
+filebeat.inputs:
+- type: filestream
+  id: springboot-docker-logs
+  enabled: true
+  
+  # Filebeat still reads from this internal path, which Docker has wired 
+  # directly to your C:\AI Products\... folder
+  paths:
+    - /usr/share/filebeat/app-logs/*.log
+    
+  parsers:
+    - ndjson:
+        target: ""
+        add_error_key: true
+
+output.logstash:
+  hosts: ["logstash:5044"]

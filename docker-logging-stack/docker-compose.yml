@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.0
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5044:5044"  # Expose port 5044 for the Beats input
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    environment:
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.0
+    user: root
+    depends_on:
+      - logstash
+    volumes:
+      # FIX: Removed the :ro at the end of this line
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      
+      # Keep the logs folder as read-only, that is perfectly fine
+      - "C:/AI Products/The Final Third/fifa-predictor/logs:/usr/share/filebeat/app-logs:ro"
+    command: >
+      bash -c "chmod go-w /usr/share/filebeat/filebeat.yml && 
+               filebeat -e -c /usr/share/filebeat/filebeat.yml"
