@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: prism_ai
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  ai:
+    openai:
+      api-key: <API_KEY>
+    anthropic:
+      api-key: <API_KEY>
+    google:
+      genai:
+        api-key: <API_KEY>
+
+app:
+  ai:
+    provider: OPENAI
+    apiKey: <API_KEY>
+    baseUrl: https://api.groq.com/openai/v1
+    models: openai/gpt-oss-120b
+    temperature: 1
+    verifySsl: false
+
+files:
+  store:
+    path: ./exports
+
+server:
+  tomcat:
+    connection-timeout: 20m   # Allow up to 20 min for large multi-PDF spec batches
