@@ -33,17 +33,17 @@ spring:
       max-request-size: 500MB
   ai:
     openai:
-      api-key: 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
+      api-key: <API_KEY>
     anthropic:
-      api-key: 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
+      api-key: <API_KEY>
     google:
       genai:
-        api-key: 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
+        api-key: <API_KEY>
 
 app:
   ai:
     provider: OPENAI
-    apiKey: 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
+    apiKey: <API_KEY>
     baseUrl: https://api.groq.com/openai/v1
     models: openai/gpt-oss-120b, openai/gpt-oss-20b, llama-3.3-70b-versatile
     temperature: 1
