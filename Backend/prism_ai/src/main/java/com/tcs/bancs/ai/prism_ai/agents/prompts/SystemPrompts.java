@@ -4,99 +4,101 @@ public class SystemPrompts {
 
 	public static final String ROUTER_SYSTEM_PROMPT = """
 			
-			Your task is to classify the user's CURRENT message into exactly ONE of the following intents,
-			       using the conversation history for context when it is provided.
+			Your task is to classify the user's CURRENT message into a list of one or MORE of the following intents,
+			using the conversation history for context when it is provided.\s
 			
-			       - CONVERSATION_CHAT
-			       - SYSTEM_CHAT
-			       - TABLE_VIEW
-			       - TIMELINE
-			       - SPAN_TREE
-			       - SEQUENCE_DIAGRAM
-			       - AI_SUMMARY
-			       - RCA
+			The `intent` field must be an array of strings (e.g., ["TABLE_VIEW", "TIMELINE"]).
 			
-			       Intent Definitions:
+			- CONVERSATION_CHAT
+			- SYSTEM_CHAT
+			- TABLE_VIEW
+			- TIMELINE
+			- SPAN_TREE
+			- SEQUENCE_DIAGRAM
+			- AI_SUMMARY
+			- RCA
 			
-			       1. CONVERSATION_CHAT
-			          - Greetings, small talk, casual conversation ("hi", "thanks", "how are you").
-			          - Technology or banking questions NOT related to a specific incident and
-			            NOT about this system itself (e.g. "what is ISO 20022?", "what is a
-			            message queue?").
-			          - Questions that do not require log analysis, trace analysis, operational
-			            investigation, or knowledge of this app/session.
+			Intent Definitions:
 			
-			       2. SYSTEM_CHAT
-			          - Questions about the assistant/system/app itself: what it can do, what
-			            views/features it supports, how to use it.
-			            e.g. "what can you help me with?", "what views do you support?",
-			            "how do I read a span tree?"
-			          - Questions about the conversation/chat history itself rather than a
-			            specific incident's data:
-			            e.g. "what did I ask you earlier?", "what was the last traceId we
-			            looked at?", "summarize what we've discussed so far", "which trace
-			            were we just on?"
-			          - Meta-questions about entities already in scope from history, where
-			            the user is asking ABOUT the history/session, not asking for a new
-			            view of the data itself.
+			1. CONVERSATION_CHAT
+			   - Greetings, small talk, casual conversation ("hi", "thanks", "how are you").
+			   - Technology or banking questions NOT related to a specific incident and
+			     NOT about this system itself (e.g. "what is ISO 20022?", "what is a
+			     message queue?").
+			   - Questions that do not require log analysis, trace analysis, operational
+			     investigation, or knowledge of this app/session.
 			
-			       3. TABLE_VIEW
-			          - Requests to view logs.
-			          - Search, filter, inspect, or retrieve log entries.
-			          - Mentions of logs, traceId, uuid, service logs, error logs.
+			2. SYSTEM_CHAT
+			   - Questions about the assistant/system/app itself: what it can do, what
+			     views/features it supports, how to use it.
+			     e.g. "what can you help me with?", "what views do you support?",
+			     "how do I read a span tree?"
+			   - Questions about the conversation/chat history itself rather than a
+			     specific incident's data:
+			     e.g. "what did I ask you earlier?", "what was the last traceId we
+			     looked at?", "summarize what we've discussed so far", "which trace
+			     were we just on?"
+			   - Meta-questions about entities already in scope from history, where
+			     the user is asking ABOUT the history/session, not asking for a new
+			     view of the data itself.
 			
-			       4. TIMELINE
-			          - Requests to view event chronology.
-			          - Questions such as:
-			            - "show timeline"
-			            - "when did this start?"
-			            - "where did the delay happen?"
+			3. TABLE_VIEW
+			   - Requests to view logs.
+			   - Search, filter, inspect, or retrieve log entries.
+			   - Mentions of logs, traceId, uuid, service logs, error logs.
 			
-			       5. SPAN_TREE
-			          - Requests to see parent-child relationships.
-			          - Questions such as:
-			            - "what called what?"
-			            - "show span tree"
-			            - "show dependency hierarchy"
+			4. TIMELINE
+			   - Requests to view event chronology.
+			   - Questions such as:
+			     - "show timeline"
+			     - "when did this start?"
+			     - "where did the delay happen?"
 			
-			       6. SEQUENCE_DIAGRAM
-			          - Requests to visualize service communication flow.
-			          - Questions such as:
-			            - "show sequence diagram"
-			            - "how did services communicate?"
-			            - "show request flow"
+			5. SPAN_TREE
+			   - Requests to see parent-child relationships.
+			   - Questions such as:
+			     - "what called what?"
+			     - "show span tree"
+			     - "show dependency hierarchy"
 			
-			       7. AI_SUMMARY
-			          - Requests for a summary or explanation of logs/incidents.
-			          - Questions such as:
-			            - "summarize this incident"
-			            - "what happened?"
-			            - "explain this failure"
+			6. SEQUENCE_DIAGRAM
+			   - Requests to visualize service communication flow.
+			   - Questions such as:
+			     - "show sequence diagram"
+			     - "how did services communicate?"
+			     - "show request flow"
 			
-			       8. RCA
-			          - Requests for root cause analysis.
-			          - Questions such as:
-			            - "why did this fail?"
-			            - "root cause?"
-			            - "what caused the error?"
+			7. AI_SUMMARY
+			   - Requests for a summary or explanation of logs/incidents.
+			   - Questions such as:
+			     - "summarize this incident"
+			     - "what happened?"
+			     - "explain this failure"
 			
-			       ------------------------------------------------------------
-			       DISAMBIGUATING CONVERSATION_CHAT vs SYSTEM_CHAT vs AI_SUMMARY
-			       ------------------------------------------------------------
-			       - "Summarize this incident" (about the DATA of a specific trace/uuid) → AI_SUMMARY.
-			       - "Summarize what we've talked about" / "what have we covered so far?"
-			         (about the SESSION, not incident data) → SYSTEM_CHAT.
-			       - "What is a traceId?" / "what is Kafka?" (general knowledge, no session
-			         reference, no incident) → CONVERSATION_CHAT.
-			       - "What can you do?" / "what features does this have?" (about the
-			         assistant/app) → SYSTEM_CHAT.
-			       - If the user references "earlier", "before", "we discussed", "last
-			         trace/uuid we looked at" WITHOUT asking for a new view/analysis of
-			         that data → SYSTEM_CHAT, not the original intent repeated.
-			       - If they reference the same thing but ask for an actual view/analysis
-			         ("show it as a timeline", "why did it fail") → classify by the view/
-			         analysis they're asking for (TIMELINE, RCA, etc.), carrying the entity
-			         forward per the ENTITY CARRY-OVER rule — NOT SYSTEM_CHAT.
+			8. RCA
+			   - Requests for root cause analysis.
+			   - Questions such as:
+			     - "why did this fail?"
+			     - "root cause?"
+			     - "what caused the error?"
+			
+			------------------------------------------------------------
+			DISAMBIGUATING CONVERSATION_CHAT vs SYSTEM_CHAT vs AI_SUMMARY
+			------------------------------------------------------------
+			- "Summarize this incident" (about the DATA of a specific trace/uuid) → AI_SUMMARY.
+			- "Summarize what we've talked about" / "what have we covered so far?"
+			  (about the SESSION, not incident data) → SYSTEM_CHAT.
+			- "What is a traceId?" / "what is Kafka?" (general knowledge, no session
+			  reference, no incident) → CONVERSATION_CHAT.
+			- "What can you do?" / "what features does this have?" (about the
+			  assistant/app) → SYSTEM_CHAT.
+			- If the user references "earlier", "before", "we discussed", "last
+			  trace/uuid we looked at" WITHOUT asking for a new view/analysis of
+			  that data → SYSTEM_CHAT, not the original intent repeated.
+			- If they reference the same thing but ask for an actual view/analysis
+			  ("show it as a timeline", "why did it fail") → classify by the view/
+			  analysis they're asking for (TIMELINE, RCA, etc.), carrying the entity
+			  forward per the ENTITY CARRY-OVER rule — NOT SYSTEM_CHAT.
 			
 			Examples:
 			
@@ -133,7 +135,9 @@ public class SystemPrompts {
 			    "type": "transaction",
 			    "id": "TXN9001",
 			    "field_hint": "transactionId"
-			  },
+			  }
+			],
+			[
 			  {
 			    "type": "customer",
 			    "id": "CUST100",
@@ -215,25 +219,6 @@ public class SystemPrompts {
 			]
 			
 			User:
-			"Show logs between 27 Jul 2026 and 29 Jul 2026, and 20 Jun and 29 Jun 2026"
-			
-			time_ranges:
-			[
-			  {
-			    "type": "absolute_range",
-			    "raw": "27 Jul 2026 and 29 Jul 2026",
-			    "start": "2026-07-27T00:00:00",
-			    "end": "2026-07-29T23:59:59"
-			  },
-			  {
-			    "type": "absolute_range",
-			    "raw": "20 Jun and 29 Jun 2026",
-			    "start": "2026-06-20T00:00:00",
-			    "end": "2026-06-29T23:59:59"
-			  }
-			]
-			
-			User:
 			"Show errors in last 15 minutes"
 			
 			time_ranges:
@@ -246,46 +231,20 @@ public class SystemPrompts {
 			  }
 			]
 			
-			User:
-			"Show logs from yesterday"
-			
-			time_ranges:
-			[
-			  {
-			    "type": "relative",
-			    "raw": "yesterday",
-			    "start": "now-1d/d",
-			    "end": "now/d"
-			  }
-			]
-			
-			User:
-			"Show logs today"
-			
-			time_ranges:
-			[
-			  {
-			    "type": "relative",
-			    "raw": "today",
-			    "start": "now/d",
-			    "end": "now"
-			  }
-			]
-			
 			requires_log_search Rules:
 			
-			- Set requires_log_search to true for OPS_CHAT.
-			- Set requires_log_search to false for GENERAL_CHAT.
+			- Set requires_log_search to true for operational queries (e.g., TABLE_VIEW, TIMELINE, SPAN_TREE, SEQUENCE_DIAGRAM, AI_SUMMARY, RCA).
+			- Set requires_log_search to false for general queries (CONVERSATION_CHAT, SYSTEM_CHAT).
 			
-			For GENERAL_CHAT:
-			- intent must be GENERAL_CHAT.
+			For general queries:
+			- `intent` array must only contain CONVERSATION_CHAT and/or SYSTEM_CHAT.
 			- confidence should reflect certainty.
 			- All entity values must be null or empty arrays.
 			- requires_log_search must be false.
 			- reason should briefly explain why the query is outside Prism AI operational scope.
 			
-			For OPS_CHAT:
-			- intent must be OPS_CHAT.
+			For operational queries:
+			- `intent` array must contain one or more operational intents.
 			- Extract all available entities.
 			- requires_log_search must be true.
 			- reason should briefly explain why the query is operational.
@@ -299,7 +258,7 @@ public class SystemPrompts {
 			Output Format:
 			
 			{
-			  "intent": "CONVERSATION_CHAT | SYSTEM_CHAT | .......",
+			  "intent": ["TABLE_VIEW", "TIMELINE"],
 			  "confidence": 0.0,
 			  "entities": {
 			    "trace_id": null,
@@ -322,7 +281,7 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": "CONVERSATION_CHAT",
+			  "intent": ["CONVERSATION_CHAT"],
 			  "confidence": 0.99,
 			  "entities": {
 			    "trace_id": null,
@@ -343,7 +302,7 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": "SYSTEM_CHAT",
+			  "intent": ["CONVERSATION_CHAT"],
 			  "confidence": 0.95,
 			  "entities": {
 			    "trace_id": null,
@@ -364,7 +323,7 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": "AI_SUMMARY",
+			  "intent": ["TABLE_VIEW"],
 			  "confidence": 0.99,
 			  "entities": {
 			    "trace_id": "abc123",
@@ -381,11 +340,32 @@ public class SystemPrompts {
 			}
 			
 			User:
+			"Show me the logs and the sequence diagram for trace abc123"
+			
+			Output:
+			{
+			  "intent": ["TABLE_VIEW", "SEQUENCE_DIAGRAM"],
+			  "confidence": 0.98,
+			  "entities": {
+			    "trace_id": "abc123",
+			    "span_id": null,
+			    "uuid": null,
+			    "service_name": null,
+			    "log_level": null,
+			    "error_type": null,
+			    "time_ranges": [],
+			    "business_entities": []
+			  },
+			  "requires_log_search": true,
+			  "reason": "User is requesting both a table view of logs and a sequence diagram for a specific trace"
+			}
+			
+			User:
 			"Why notification with notification id 3001 got failed?"
 			
 			Output:
 			{
-			  "intent": "AI_SUMMARY",
+			  "intent": ["RCA", "AI_SUMMARY"],
 			  "confidence": 0.98,
 			  "entities": {
 			    "trace_id": null,
@@ -404,7 +384,7 @@ public class SystemPrompts {
 			    ]
 			  },
 			  "requires_log_search": true,
-			  "reason": "User is asking to investigate failure of a notification using business identifier"
+			  "reason": "User is asking for root cause and summary of a failure using a business identifier"
 			}
 			
 			User:
@@ -412,7 +392,7 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": "TABLE_VIEW",
+			  "intent": ["TABLE_VIEW"],
 			  "confidence": 0.97,
 			  "entities": {
 			    "trace_id": null,
@@ -434,73 +414,6 @@ public class SystemPrompts {
 			  "requires_log_search": true,
 			  "reason": "User is asking to retrieve error logs for a specific date"
 			}
-			
-			User:
-			"What are logs between 27 Jul 2026 and 29 Jul 2026, and 20 Jun and 29 Jun 2026?"
-			
-			Output:
-			{
-			  "intent": "TABLE_VIEW",
-			  "confidence": 0.97,
-			  "entities": {
-			    "trace_id": null,
-			    "span_id": null,
-			    "uuid": null,
-			    "service_name": null,
-			    "log_level": null,
-			    "error_type": null,
-			    "time_ranges": [
-			      {
-			        "type": "absolute_range",
-			        "raw": "27 Jul 2026 and 29 Jul 2026",
-			        "start": "2026-07-27T00:00:00",
-			        "end": "2026-07-29T23:59:59"
-			      },
-			      {
-			        "type": "absolute_range",
-			        "raw": "20 Jun and 29 Jun 2026",
-			        "start": "2026-06-20T00:00:00",
-			        "end": "2026-06-29T23:59:59"
-			      }
-			    ],
-			    "business_entities": []
-			  },
-			  "requires_log_search": true,
-			  "reason": "User is asking to retrieve logs for multiple date ranges"
-			}
-			
-			User:
-			"Why transaction TXN9001 failed for customer CUST100?"
-			
-			Output:
-			{
-			  "intent": "AI_SUMMARY",
-			  "confidence": 0.98,
-			  "entities": {
-			    "trace_id": null,
-			    "span_id": null,
-			    "uuid": null,
-			    "service_name": null,
-			    "log_level": "ERROR",
-			    "error_type": null,
-			    "time_ranges": [],
-			    "business_entities": [
-			      {
-			        "type": "transaction",
-			        "id": "TXN9001",
-			        "field_hint": "transactionId"
-			      },
-			      {
-			        "type": "customer",
-			        "id": "CUST100",
-			        "field_hint": "customerId"
-			      }
-			    ]
-			  },
-			  "requires_log_search": true,
-			  "reason": "User is asking to investigate failure using transaction and customer identifiers"
-			} 
-			       
 			
 			""";
 

@@ -5,18 +5,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouterResponseDTO {
 	
-	private String intent;
+	private List<String> intent;
 	private String confidence;
 	private RouterEntityDTO entities;
 	private boolean resolvedFromHistory;
 	@JsonProperty(value = "requires_log_search")
 	private boolean requiresLogSearch;
 	private String reason;
-
 
 }
