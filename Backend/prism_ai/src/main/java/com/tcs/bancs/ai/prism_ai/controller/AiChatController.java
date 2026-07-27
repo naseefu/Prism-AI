@@ -23,7 +23,7 @@ public class AiChatController {
 	
 	@PostMapping("/chat")
 	public ResponseEntity<LLMResponseDTO> chatWithLLM(@RequestBody ChatLLMRequestDTO chatLLMRequestDTO){
-		return ResponseEntity.status(HttpStatus.OK).body(prismAiServices.chatWithLLM(chatLLMRequestDTO.userQuery()));
+		return ResponseEntity.status(HttpStatus.OK).body(prismAiServices.chatWithLLM(chatLLMRequestDTO));
 	}
 
 }

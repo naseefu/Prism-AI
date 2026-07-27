@@ -1,3 +1,5 @@
 package com.tcs.bancs.ai.prism_ai.dto;
 
-public record ChatLLMRequestDTO(String userQuery) {}
+import java.util.Optional;
+
+public record ChatLLMRequestDTO(String userQuery, Optional<String> conversationId, Long userId) {}

@@ -1,27 +1,56 @@
 spring:
   application:
     name: prism_ai
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/prism_ai?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: Strong@123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: PrismHikariPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+
   servlet:
     multipart:
       max-file-size: 500MB
       max-request-size: 500MB
   ai:
     openai:
-      api-key: <API_KEY>
+      api-key: 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
     anthropic:
-      api-key: <API_KEY>
+      api-key: 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
     google:
       genai:
-        api-key: <API_KEY>
+        api-key: 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
 
 app:
   ai:
     provider: OPENAI
-    apiKey: <API_KEY>
+    apiKey: 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
     baseUrl: https://api.groq.com/openai/v1
-    models: openai/gpt-oss-120b
+    models: openai/gpt-oss-120b, openai/gpt-oss-20b, llama-3.3-70b-versatile
     temperature: 1
     verifySsl: false
+    lightweight: openai/gpt-oss-20b
+    mediumweight: llama-3.3-70b-versatile
+    heavyweight: openai/gpt-oss-120b
 
 files:
   store:

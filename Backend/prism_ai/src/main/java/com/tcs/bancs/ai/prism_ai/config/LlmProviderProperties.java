@@ -12,7 +12,10 @@ public record LlmProviderProperties(
         @NotNull String apiKey,
         List<String> models,
         Double temperature,
-        boolean verifySsl
+        boolean verifySsl,
+        String lightweight,
+        String mediumweight,
+        String heavyweight
 ) {
     public enum Provider {
         OPENAI, ANTHROPIC, GOOGLE
