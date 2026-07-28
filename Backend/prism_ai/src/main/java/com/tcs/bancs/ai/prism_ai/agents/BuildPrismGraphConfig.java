@@ -40,7 +40,8 @@ public class BuildPrismGraphConfig {
 		stateGraph.addNode("router", node_async(routerNode));
 		stateGraph.addNode("conversation-chat", node_async(new GeneralChatNode()));
 		stateGraph.addNode("chat-naming", node_async(chatNamingNode));
-		stateGraph.addNode("ai-summary", node_async(aiSummaryNode));
+
+		stateGraph.addNode("ops-chat", node_async(aiSummaryNode));
 		stateGraph.addNode("system-chat", node_async(systemChatNode));
 		
 		stateGraph.addEdge(START, "guardrails");
@@ -58,10 +59,10 @@ public class BuildPrismGraphConfig {
 				edge_async(new RouterNodeToNext()), 
 				Map.of(
 					"CONVERSATION_CHAT", "conversation-chat",
-						"AI_SUMMARY","ai-summary", "SYSTEM_CHAT","system-chat"
+						"OPS_CHAT","ops-chat", "SYSTEM_CHAT","system-chat"
 				));
 
-		stateGraph.addEdge("ai-summary", END);
+		stateGraph.addEdge("ops-chat", END);
 		stateGraph.addEdge("conversation-chat", END);
 		stateGraph.addEdge("system-chat", END);
 		

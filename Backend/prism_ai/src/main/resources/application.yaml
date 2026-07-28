@@ -17,6 +17,9 @@ spring:
       validation-timeout: 5000
       leak-detection-threshold: 60000
 
+  elasticsearch:
+    uris: http://localhost:9200
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -33,17 +36,17 @@ spring:
       max-request-size: 500MB
   ai:
     openai:
-      api-key: <API_KEY>
+      api-key: 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
     anthropic:
-      api-key: <API_KEY>
+      api-key: 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
     google:
       genai:
-        api-key: <API_KEY>
+        api-key: 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
 
 app:
   ai:
     provider: OPENAI
-    apiKey: <API_KEY>
+    apiKey: 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
     baseUrl: https://api.groq.com/openai/v1
     models: openai/gpt-oss-120b, openai/gpt-oss-20b, llama-3.3-70b-versatile
     temperature: 1

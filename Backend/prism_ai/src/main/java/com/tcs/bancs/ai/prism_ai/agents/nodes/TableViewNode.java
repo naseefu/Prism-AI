@@ -4,6 +4,7 @@ import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
 import com.tcs.bancs.ai.prism_ai.agents.prompts.SystemPrompts;
 import com.tcs.bancs.ai.prism_ai.config.LlmProviderProperties;
+import com.tcs.bancs.ai.prism_ai.dto.RouterResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
@@ -24,6 +25,7 @@ public class TableViewNode implements NodeAction {
     public Map<String, Object> apply(OverAllState state) {
 
         List<Message> historyMessage = new ArrayList<>();
+        RouterResponseDTO aiRouterResponse = state.value("router-response", new RouterResponseDTO());
 
         if(state.value("history").isPresent()){
             Object history = state.value("history").get();

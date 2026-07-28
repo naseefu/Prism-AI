@@ -11,13 +11,13 @@ public class RouterNodeToNext implements EdgeAction {
 	public String apply(OverAllState state) {
 		
 		RouterResponseDTO aiRouterResponse = state.value("router-response", new RouterResponseDTO());
-		String intent = aiRouterResponse.getIntent()!=null? (aiRouterResponse.getIntent().getFirst()!=null? aiRouterResponse.getIntent().getFirst() : "SYSTEM_CHAT") : "SYSTEM_CHAT";
+		String intent = aiRouterResponse.getIntent()!=null? (aiRouterResponse.getIntent().getFirst()!=null?
+				aiRouterResponse.getIntent().getFirst() : "SYSTEM_CHAT") : "SYSTEM_CHAT";
 
 		return switch (intent){
-            case "AI_SUMMARY" -> "AI_SUMMARY";
 			case "CONVERSATION_CHAT" -> "CONVERSATION_CHAT";
-			case "SEQUENCE_DIAGRAM" -> "SEQUENCE_DIAGRAM";
-            default -> "SYSTEM_CHAT";
+			case "SYSTEM_CHAT" -> "SYSTEM_CHAT";
+            default -> "OPS_CHAT";
         };
 	}
 

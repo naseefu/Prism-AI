@@ -12,4 +12,9 @@ public class RouterTimeRange {
     private String raw;
     private String start;
     private String end;
+
+    public RouterTimeRange(String start, String end){
+        this.start = start;
+        this.end = end;
+    }
 }
