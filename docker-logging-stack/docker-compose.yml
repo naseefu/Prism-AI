@@ -41,6 +41,7 @@ services:
 
       # Keep the logs folder as read-only, that is perfectly fine
       - "C:/AI Products/Prism-AI/docker-logging-stack/anhub.log:/usr/share/filebeat/app-logs/anhub.log:ro"
+      - "C:/AI Products/Prism-AI/docker-logging-stack/payments.log:/usr/share/filebeat/app-logs/payments.log:ro"
     command: >
       bash -c "chmod go-w /usr/share/filebeat/filebeat.yml && 
                filebeat -e -c /usr/share/filebeat/filebeat.yml"

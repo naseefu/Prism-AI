@@ -1,17 +1,29 @@
 filebeat.inputs:
 - type: filestream
-  id: springboot-docker-logs
+  id: anhub-docker-logs
   enabled: true
-  
-  # Filebeat still reads from this internal path, which Docker has wired 
-  # directly to your C:\AI Products\... folder
   paths:
-    - /usr/share/filebeat/app-logs/*.log
-    
+    - /usr/share/filebeat/app-logs/anhub.log
   parsers:
     - ndjson:
         target: ""
         add_error_key: true
+  fields:
+    log_source: anhub
+  fields_under_root: true
+
+- type: filestream
+  id: payments-docker-logs
+  enabled: true
+  paths:
+    - /usr/share/filebeat/app-logs/payments.log
+  parsers:
+    - ndjson:
+        target: ""
+        add_error_key: true
+  fields:
+    log_source: payments
+  fields_under_root: true
 
 output.logstash:
   hosts: ["logstash:5044"]
