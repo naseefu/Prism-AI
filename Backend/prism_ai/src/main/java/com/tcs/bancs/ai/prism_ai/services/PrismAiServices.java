@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.tcs.bancs.ai.prism_ai.agents.models.AiResponseModel;
 import com.tcs.bancs.ai.prism_ai.dto.ChatLLMRequestDTO;
 import com.tcs.bancs.ai.prism_ai.entity.ChatMessage;
 import com.tcs.bancs.ai.prism_ai.entity.ChatSessions;
@@ -14,7 +17,6 @@ import com.tcs.bancs.ai.prism_ai.repository.ChatMessageRepo;
 import com.tcs.bancs.ai.prism_ai.repository.ChatSessionsRepo;
 import com.tcs.bancs.ai.prism_ai.repository.UserEntityRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.MessageType;
@@ -25,7 +27,6 @@ import org.springframework.util.ObjectUtils;
 
 import com.alibaba.cloud.ai.graph.CompiledGraph;
 import com.alibaba.cloud.ai.graph.OverAllState;
-import com.tcs.bancs.ai.prism_ai.agents.BuildPrismGraphConfig;
 import com.tcs.bancs.ai.prism_ai.dto.LLMResponseDTO;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -37,6 +38,7 @@ public class PrismAiServices {
 	private final ChatMessageRepo chatMessageRepo;
 	private final ChatSessionsRepo chatSessionsRepo;
 	private final UserEntityRepo userEntityRepo;
+	private final ObjectMapper objectMapper;
 
 	public LLMResponseDTO chatWithLLM(ChatLLMRequestDTO chatLLMReq) {
 		
@@ -71,6 +73,7 @@ public class PrismAiServices {
 
 			Map<String, Object> llmMetadata = new HashMap<>();
 			llmMetadata.put("message", chatLLMReq.userQuery());
+			llmMetadata.put("ai-response", new AiResponseModel());
 
 			if(isChatSessionPresent){
 				llmMetadata.put("chat-name", chatSessions.getSessionName());
@@ -84,12 +87,20 @@ public class PrismAiServices {
 			OverAllState result = buildPrismAiGraph.invoke(llmMetadata).get();
 			
 			String errorMessage = result.value("error-message", "");
+			Object rawMap = result.value("ai-response", new java.util.LinkedHashMap<>());
+			String jsonString = new Gson().toJson(rawMap);
+
+			AiResponseModel aiResponseModel = null;
+			if (rawMap != null && !rawMap.toString().equals("{}")) {
+				// 2. Now Jackson is forced to do a deep conversion because rawMap is NOT an AiResponseModel
+				aiResponseModel = objectMapper.readValue(jsonString, AiResponseModel.class);
+			}
 			
 			if(!ObjectUtils.isEmpty(errorMessage)) {
-				llmResponse.setLlmResponse(errorMessage);
+				llmResponse.setErrorResponse(errorMessage);
 			}
-			else {
-				llmResponse.setLlmResponse(result.value("ai-response",""));
+			else if(!ObjectUtils.isEmpty(aiResponseModel)) {
+				llmResponse.setAiResponseModel(aiResponseModel);
 
 				if(!isChatSessionPresent){
 					chatSessions = new ChatSessions();
@@ -101,8 +112,11 @@ public class PrismAiServices {
 				}
 
 				chatMessageRepo.save(getChatMessage(chatLLMReq.userQuery(), MessageType.USER, chatSessions.getConversationId()));
-				chatMessageRepo.save(getChatMessage(llmResponse.getLlmResponse(), MessageType.ASSISTANT, chatSessions.getConversationId()));
+				chatMessageRepo.save(getChatMessage(objectMapper.writeValueAsString(aiResponseModel), MessageType.ASSISTANT, chatSessions.getConversationId()));
 
+			}
+			else{
+				llmResponse.setErrorResponse("Error occurred while generating response....");
 			}
 
 			if(chatSessions!=null && chatSessions.getConversationId()!=null){
@@ -112,6 +126,7 @@ public class PrismAiServices {
 		}
 		catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 		}
 		
 		return llmResponse;

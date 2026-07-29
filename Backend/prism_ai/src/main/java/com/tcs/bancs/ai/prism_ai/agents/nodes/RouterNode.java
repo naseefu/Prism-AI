@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tcs.bancs.ai.prism_ai.agents.prompts.SystemPrompts;
 import com.tcs.bancs.ai.prism_ai.config.LlmProviderProperties;
 import com.tcs.bancs.ai.prism_ai.dto.RouterResponseDTO;
+import org.springframework.util.ObjectUtils;
 
 @Component
 public class RouterNode implements NodeAction {
@@ -32,6 +33,10 @@ public class RouterNode implements NodeAction {
 	public Map<String, Object> apply(OverAllState state) throws Exception {
 
 		List<Message> historyMessage = new ArrayList<>();
+
+		if(!ObjectUtils.isEmpty(state.value("router-response",""))){
+			return Map.of();
+		}
 
 		if(state.value("history").isPresent()){
 			Object history = state.value("history").get();

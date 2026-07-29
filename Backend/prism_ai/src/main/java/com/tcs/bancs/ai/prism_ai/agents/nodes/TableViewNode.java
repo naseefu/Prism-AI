@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +36,37 @@ public class TableViewNode implements NodeAction {
             }
 
         }
+
+        String logSearchResult = state.value("log-search-result", "");
+
+        String userQuery;
+
+        if(!ObjectUtils.isEmpty(logSearchResult)){
+
+            userQuery = """
+                
+                This is the log result extracted from elastic search based on user query : 
+                
+                %s
+                
+                ===========================================================================
+                
+                this is the user query : 
+                
+                %s
+                
+                """.formatted(logSearchResult, state.value("message",""));
+
+        }
+        else{
+            userQuery = state.value("message", "");
+        }
+
         String responseFromAi = chatClients.get(llmProviderProperties.heavyweight())
                 .prompt()
                 .messages(historyMessage)
                 .system(SystemPrompts.TABLE_VIEW_SYSTEM_PROMPT)
-                .user(state.value("message",""))
+                .user(userQuery)
                 .call()
                 .content();
 

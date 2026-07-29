@@ -112,7 +112,6 @@ public class ElasticSearchService {
         try{
             return client.search(request, Map.class);
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -122,6 +121,11 @@ public class ElasticSearchService {
      * ready to serialize into the RCA/AI_SUMMARY prompt context.
      */
     public List<Map<String, Object>> extractResults(SearchResponse<Map> response) {
+
+        if(response==null){
+            return List.of();
+        }
+
         long total = response.hits().total() != null ? response.hits().total().value() : 0;
 
         List<Map<String, Object>> results = new java.util.ArrayList<>();

@@ -28,8 +28,9 @@ public class BuildPrismGraphConfig {
 	private final RouterNode routerNode;
 	private final ChatNamingNode chatNamingNode;
 	private final GuardRailsNode guardRailsNode;
-	private final AISummaryNode aiSummaryNode;
+	private final OpsChatNode opsChatNode;
 	private final SystemChatNode systemChatNode;
+	private final ElasticSearchNode elasticSearchNode;
 
 	@Bean
 	public CompiledGraph buildPrismAiGraph() throws GraphStateException {
@@ -41,8 +42,9 @@ public class BuildPrismGraphConfig {
 		stateGraph.addNode("conversation-chat", node_async(new GeneralChatNode()));
 		stateGraph.addNode("chat-naming", node_async(chatNamingNode));
 
-		stateGraph.addNode("ops-chat", node_async(aiSummaryNode));
+		stateGraph.addNode("ops-chat", node_async(opsChatNode));
 		stateGraph.addNode("system-chat", node_async(systemChatNode));
+		stateGraph.addNode("log-search", node_async(elasticSearchNode));
 		
 		stateGraph.addEdge(START, "guardrails");
 		
@@ -59,9 +61,10 @@ public class BuildPrismGraphConfig {
 				edge_async(new RouterNodeToNext()), 
 				Map.of(
 					"CONVERSATION_CHAT", "conversation-chat",
-						"OPS_CHAT","ops-chat", "SYSTEM_CHAT","system-chat"
+						"OPS_CHAT","ops-chat", "SYSTEM_CHAT","system-chat","LOG_SEARCH","log-search"
 				));
 
+		stateGraph.addEdge("log-search", "router");
 		stateGraph.addEdge("ops-chat", END);
 		stateGraph.addEdge("conversation-chat", END);
 		stateGraph.addEdge("system-chat", END);
@@ -77,6 +80,7 @@ public class BuildPrismGraphConfig {
             strategies.put("patchAttempt", new ReplaceStrategy());
             strategies.put("buildStatus", new ReplaceStrategy());   // "SUCCESS" | "FAILED"
             strategies.put("retryCount", new ReplaceStrategy());
+			strategies.put("ai-response", new ReplaceStrategy());
             return strategies;
         };
     }

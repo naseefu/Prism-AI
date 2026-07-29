@@ -25,5 +25,18 @@ filebeat.inputs:
     log_source: payments
   fields_under_root: true
 
+- type: filestream
+  id: workbench-docker-logs
+  enabled: true
+  paths:
+    - /usr/share/filebeat/app-logs/workbench.log
+  parsers:
+    - ndjson:
+        target: ""
+        add_error_key: true
+  fields:
+    log_source: workbench
+  fields_under_root: true
+
 output.logstash:
   hosts: ["logstash:5044"]
