@@ -17,16 +17,19 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Component
-public class TableViewNode implements NodeAction {
+public class TableViewNode{
 
     private final Map<String, ChatClient> chatClients;
     private final LlmProviderProperties llmProviderProperties;
 
-    @Override
-    public Map<String, Object> apply(OverAllState state) {
+    public Map<String, Object> apply(OverAllState state, String question) {
 
         List<Message> historyMessage = new ArrayList<>();
         RouterResponseDTO aiRouterResponse = state.value("router-response", new RouterResponseDTO());
+
+        if(ObjectUtils.isEmpty(question)){
+            question = state.value("message", "");
+        }
 
         if(state.value("history").isPresent()){
             Object history = state.value("history").get();
@@ -55,11 +58,11 @@ public class TableViewNode implements NodeAction {
                 
                 %s
                 
-                """.formatted(logSearchResult, state.value("message",""));
+                """.formatted(logSearchResult, question);
 
         }
         else{
-            userQuery = state.value("message", "");
+            userQuery = question;
         }
 
         String responseFromAi = chatClients.get(llmProviderProperties.heavyweight())

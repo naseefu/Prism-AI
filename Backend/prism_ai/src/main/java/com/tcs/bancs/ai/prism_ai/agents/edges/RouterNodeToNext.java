@@ -18,8 +18,8 @@ public class RouterNodeToNext implements EdgeAction {
 			return "LOG_SEARCH";
 		}
 
-		String intent = aiRouterResponse.getIntent()!=null? (aiRouterResponse.getIntent().getFirst()!=null?
-				aiRouterResponse.getIntent().getFirst() : "SYSTEM_CHAT") : "SYSTEM_CHAT";
+		String intent = aiRouterResponse.getIntents()!=null? (aiRouterResponse.getIntents().getFirst()!=null?
+				aiRouterResponse.getIntents().getFirst().getIntent() : "SYSTEM_CHAT") : "SYSTEM_CHAT";
 
 		return switch (intent){
 			case "CONVERSATION_CHAT" -> "CONVERSATION_CHAT";

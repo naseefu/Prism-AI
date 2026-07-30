@@ -12,7 +12,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RouterResponseDTO {
 	
-	private List<String> intent;
+	private List<RouterIntents> intents;
 	private String confidence;
 	private RouterEntityDTO entities;
 	private boolean resolvedFromHistory;

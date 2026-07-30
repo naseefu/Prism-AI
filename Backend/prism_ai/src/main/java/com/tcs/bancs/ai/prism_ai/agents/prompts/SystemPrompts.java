@@ -4,10 +4,13 @@ public class SystemPrompts {
 
 	public static final String ROUTER_SYSTEM_PROMPT = """
 			
-			Your task is to classify the user's CURRENT message into a list of one or MORE of the following intents,
+			Your task is to classify the user's CURRENT message into one or MORE of the following intents,
 			using the conversation history for context when it is provided.\s
 			
-			The `intent` field must be an array of strings (e.g., ["TABLE_VIEW", "TIMELINE"]).
+			The `intents` field must be an array of objects. Each object must contain two keys:
+			- `intent`: The identified intent from the list below.
+			- `question`: A standalone question specifically tailored to that intent based on the user's original query.
+			(e.g., [{"intent": "AI_SUMMARY", "question": "ai summary of trace id abc"}])
 			
 			- CONVERSATION_CHAT
 			- SYSTEM_CHAT
@@ -237,14 +240,14 @@ public class SystemPrompts {
 			- Set requires_log_search to false for general queries (CONVERSATION_CHAT, SYSTEM_CHAT).
 			
 			For general queries:
-			- `intent` array must only contain CONVERSATION_CHAT and/or SYSTEM_CHAT.
+			- `intents` array must only contain objects with CONVERSATION_CHAT and/or SYSTEM_CHAT intents.
 			- confidence should reflect certainty.
 			- All entity values must be null or empty arrays.
 			- requires_log_search must be false.
 			- reason should briefly explain why the query is outside Prism AI operational scope.
 			
 			For operational queries:
-			- `intent` array must contain one or more operational intents.
+			- `intents` array must contain one or more objects mapping to operational intents.
 			- Extract all available entities.
 			- requires_log_search must be true.
 			- reason should briefly explain why the query is operational.
@@ -258,7 +261,16 @@ public class SystemPrompts {
 			Output Format:
 			
 			{
-			  "intent": ["TABLE_VIEW", "TIMELINE"],
+			  "intents": [
+			    {
+			      "intent": "TABLE_VIEW",
+			      "question": "table view for the specific request"
+			    },
+			    {
+			      "intent": "TIMELINE",
+			      "question": "timeline view for the specific request"
+			    }
+			  ],
 			  "confidence": 0.0,
 			  "entities": {
 			    "trace_id": null,
@@ -281,7 +293,12 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": ["CONVERSATION_CHAT"],
+			  "intents": [
+			    {
+			      "intent": "CONVERSATION_CHAT",
+			      "question": "hi"
+			    }
+			  ],
 			  "confidence": 0.99,
 			  "entities": {
 			    "trace_id": null,
@@ -302,7 +319,12 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": ["CONVERSATION_CHAT"],
+			  "intents": [
+			    {
+			      "intent": "CONVERSATION_CHAT",
+			      "question": "What is Kafka?"
+			    }
+			  ],
 			  "confidence": 0.95,
 			  "entities": {
 			    "trace_id": null,
@@ -323,7 +345,12 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": ["TABLE_VIEW"],
+			  "intents": [
+			    {
+			      "intent": "TABLE_VIEW",
+			      "question": "show logs for traceId abc123"
+			    }
+			  ],
 			  "confidence": 0.99,
 			  "entities": {
 			    "trace_id": "abc123",
@@ -344,7 +371,16 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": ["TABLE_VIEW", "SEQUENCE_DIAGRAM"],
+			  "intents": [
+			    {
+			      "intent": "TABLE_VIEW",
+			      "question": "show logs for trace abc123"
+			    },
+			    {
+			      "intent": "SEQUENCE_DIAGRAM",
+			      "question": "show sequence diagram for trace abc123"
+			    }
+			  ],
 			  "confidence": 0.98,
 			  "entities": {
 			    "trace_id": "abc123",
@@ -365,7 +401,16 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": ["RCA", "AI_SUMMARY"],
+			  "intents": [
+			    {
+			      "intent": "RCA",
+			      "question": "why did notification with notification id 3001 fail?"
+			    },
+			    {
+			      "intent": "AI_SUMMARY",
+			      "question": "summarize why notification with notification id 3001 failed"
+			    }
+			  ],
 			  "confidence": 0.98,
 			  "entities": {
 			    "trace_id": null,
@@ -392,7 +437,12 @@ public class SystemPrompts {
 			
 			Output:
 			{
-			  "intent": ["TABLE_VIEW"],
+			  "intents": [
+			    {
+			      "intent": "TABLE_VIEW",
+			      "question": "show error logs at date 27/01/2026"
+			    }
+			  ],
 			  "confidence": 0.97,
 			  "entities": {
 			    "trace_id": null,
@@ -413,6 +463,36 @@ public class SystemPrompts {
 			  },
 			  "requires_log_search": true,
 			  "reason": "User is asking to retrieve error logs for a specific date"
+			}
+			
+			User:
+			"i want ai summary and table view of trace id asfjaisfjasifasf"
+			
+			Output:
+			{
+			  "intents": [
+			    {
+			      "intent": "AI_SUMMARY",
+			      "question": "ai summary of trace id asfjaisfjasifasf"
+			    },
+			    {
+			      "intent": "TABLE_VIEW",
+			      "question": "table view of trace id asfjaisfjasifasf"
+			    }
+			  ],
+			  "confidence": 0.99,
+			  "entities": {
+			    "trace_id": "asfjaisfjasifasf",
+			    "span_id": null,
+			    "uuid": null,
+			    "service_name": null,
+			    "log_level": null,
+			    "error_type": null,
+			    "time_ranges": [],
+			    "business_entities": []
+			  },
+			  "requires_log_search": true,
+			  "reason": "User requested an AI summary and log table view for a specific trace ID"
 			}
 			
 			""";

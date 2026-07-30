@@ -1,8 +1,7 @@
 package com.tcs.bancs.ai.prism_ai.agents.nodes;
 
 import com.alibaba.cloud.ai.graph.OverAllState;
-import com.alibaba.cloud.ai.graph.action.NodeAction;
-import com.tcs.bancs.ai.prism_ai.agents.prompts.SystemPrompts;
+import com.tcs.bancs.ai.prism_ai.agents.prompts.AdvancedSystemPrompt;
 import com.tcs.bancs.ai.prism_ai.config.LlmProviderProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
@@ -16,7 +15,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class AISummaryNode {
+public class TimelineViewNode {
 
     private final Map<String, ChatClient> chatClients;
     private final LlmProviderProperties llmProviderProperties;
@@ -66,7 +65,7 @@ public class AISummaryNode {
         String responseFromAi = chatClients.get(llmProviderProperties.heavyweight())
                 .prompt()
                 .messages(historyMessage)
-                .system(SystemPrompts.AI_SUMMARY_SYSTEM_PROMPT)
+                .system(AdvancedSystemPrompt.TIMELINE_VIEW_SYSTEM_PROMPT)
                 .user(userQuery)
                 .call()
                 .content();
@@ -77,4 +76,5 @@ public class AISummaryNode {
 
         return Map.of();
     }
+
 }
