@@ -1,84 +1,57 @@
 package com.tcs.bancs.ai.prism_ai.agents.nodes;
 
 import com.alibaba.cloud.ai.graph.OverAllState;
-import com.alibaba.cloud.ai.graph.action.NodeAction;
-import com.tcs.bancs.ai.prism_ai.agents.prompts.SystemPrompts;
-import com.tcs.bancs.ai.prism_ai.config.LlmProviderProperties;
+import com.tcs.bancs.ai.prism_ai.agents.models.table_view.LogResponse;
 import com.tcs.bancs.ai.prism_ai.dto.RouterResponseDTO;
+import com.tcs.bancs.ai.prism_ai.services.LogMappingService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.Message;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Table View Node — programmatically maps Elasticsearch log hits into a
+ * {@link LogResponse} DTO using {@link LogMappingService}. No LLM involvement.
+ *
+ * <p>Reads pre-fetched log hits from {@code state["filteredLogHits"]} (set by
+ * {@link ElasticSearchNode}). Returns a fully typed LogResponse.</p>
+ */
 @RequiredArgsConstructor
 @Component
-public class TableViewNode{
+@Slf4j
+public class TableViewNode {
 
-    private final Map<String, ChatClient> chatClients;
-    private final LlmProviderProperties llmProviderProperties;
+    private final LogMappingService logMappingService;
 
-    public Map<String, Object> apply(OverAllState state, String question) {
+    /**
+     * Build the table view response from pre-fetched log hits in state.
+     *
+     * @return map containing a {@link LogResponse} under "ai-response"
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> apply(OverAllState state) {
 
-        List<Message> historyMessage = new ArrayList<>();
         RouterResponseDTO aiRouterResponse = state.value("router-response", new RouterResponseDTO());
 
-        if(ObjectUtils.isEmpty(question)){
-            question = state.value("message", "");
-        }
+        // Step 1: Read pre-fetched log hits from state
+        List<Map<String, Object>> logHits = Collections.emptyList();
 
-        if(state.value("history").isPresent()){
-            Object history = state.value("history").get();
-
-            if(history instanceof List){
-                historyMessage = (List<Message>) history;
+        if (state.value("filteredLogHits").isPresent()) {
+            Object raw = state.value("filteredLogHits").get();
+            if (raw instanceof List) {
+                logHits = (List<Map<String, Object>>) raw;
             }
-
         }
 
-        String logSearchResult = state.value("log-search-result", "");
+        // Step 2: Programmatic mapping — zero LLM
+        LogResponse logResponse = logMappingService.mapToLogResponse(
+                logHits,
+                aiRouterResponse.getEntities()
+        );
 
-        String userQuery;
-
-        if(!ObjectUtils.isEmpty(logSearchResult)){
-
-            userQuery = """
-                
-                This is the log result extracted from elastic search based on user query : 
-                
-                %s
-                
-                ===========================================================================
-                
-                this is the user query : 
-                
-                %s
-                
-                """.formatted(logSearchResult, question);
-
-        }
-        else{
-            userQuery = question;
-        }
-
-        String responseFromAi = chatClients.get(llmProviderProperties.heavyweight())
-                .prompt()
-                .messages(historyMessage)
-                .system(SystemPrompts.TABLE_VIEW_SYSTEM_PROMPT)
-                .user(userQuery)
-                .call()
-                .content();
-
-        if(responseFromAi!=null){
-            return Map.of("ai-response", responseFromAi);
-        }
-
-        return Map.of();
+        return Map.of("ai-response", logResponse);
     }
-
-
 }

@@ -81,6 +81,8 @@ public class BuildPrismGraphConfig {
             strategies.put("buildStatus", new ReplaceStrategy());   // "SUCCESS" | "FAILED"
             strategies.put("retryCount", new ReplaceStrategy());
 			strategies.put("ai-response", new ReplaceStrategy());
+			strategies.put("filteredLogHits", new ReplaceStrategy());
+			strategies.put("unfilteredTraceSpans", new ReplaceStrategy());
             return strategies;
         };
     }
